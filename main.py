@@ -3,7 +3,7 @@ from platform import system
 import shutil
 import sys
 
-class FileClassifier:
+class Classifier:
     def __init__(self, abs_path, des_path, enter_sub):
         self.abs_path = abs_path
         self.enter_sub = enter_sub.upper()
@@ -85,4 +85,4 @@ path_inp = input('Enter a absolute path of directroy: ').strip(' ')
 dest_path = input('Enter the destination path of new directory: (Default root directory) ').strip(' ')
 walk_inp = input('Enter to every subdirectory: (Y/N) (Default N) ').strip(' ')
 
-FileClassifier(path_inp, dest_path, walk_inp)
+Classifier(path_inp, dest_path, walk_inp)
