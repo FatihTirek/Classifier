@@ -3,7 +3,7 @@ File Classifier is a Python script designed to categorize files based on their f
 
 ## Features
 • File Categorization: Files are categorized based on their file extensions into separate directories.  
-• Support for Subdirectorie: Users can choose whether to enter subdirectories and categorize files within them.  
+• Support for Subdirectories: Users can choose whether to enter subdirectories and categorize files within them.  
 
 ## Note
 • Make sure to provide valid absolute paths for both the source and destination directories.  
