@@ -1,88 +1,48 @@
 from os import path, listdir, mkdir, walk
-from platform import system
-import shutil
-import sys
+from shutil import rmtree, move
+from sys import exit
 
 class Classifier:
-    def __init__(self, abs_path, des_path, enter_sub):
+    def __init__(self, abs_path, dest_path, traverse=False):
         self.abs_path = abs_path
-        self.enter_sub = enter_sub.upper()
-        self.os = system()
-        self.rootdir = None
-        
-        if des_path != '':
-            self.rootdir = des_path
-            self.__run()
+        self.dest_path = dest_path
+        self.traverse = traverse
+
+        if not path.isdir(self.abs_path) or not path.exists(self.abs_path):
+            print('Invalid absolute path. Check it again')
+            exit()
+        if not path.isdir(self.dest_path) or not path.exists(self.dest_path):
+            print('Invalid destination path. Check it again')
+            exit()
+                
+        if self.traverse:
+            for curr_path, _, files in walk(self.abs_path, topdown=True):
+                self.__run(files, curr_path)
         else:
-            self.__wrapper()
+            self.__run(listdir(self.abs_path), self.abs_path)
+            
+        rmtree(self.abs_path)
 
-    def __wrapper(self):
-        if self.os == 'Windows':
-            self.rootdir = 'C:\\Categorization\\'
-        elif self.os == 'Darwin':
-            # Mac root directroy
-            print('Does not support Mac yet')
-            sys.exit()
-        else:
-            # Linux root directroy
-            print('Does not support Linux yet')
-            sys.exit()
+    def __run(self, files, curr_path):
+        for file in files:
+            _, ext = path.splitext(file)
+            dest_path = None
 
-        self.__run()
-
-    def __creator(self):
-        if path.isdir(self.abs_path) and path.exists(self.abs_path):
-            if len(listdir(self.abs_path)) != 0:
-                if path.isdir(self.rootdir):
-                    if not path.exists(self.rootdir):
-                        mkdir(self.rootdir)
-
-                    self.__walk_or_not()
-                else:
-                    raise Exception('Please enter a valid directroy!')
+            if ext:
+                dest_path = self.dest_path + "\\" + ext[1:].upper() + " Files"
             else:
-                raise Exception('Target directory is empty!')
-        else:
-            raise Exception('Check the path again!')
+                dest_path = self.dest_path + "\\Unknown Files"
 
-    def __walk_or_not(self):
-        if self.enter_sub == 'Y':
-            for current_path, _, files in walk(self.abs_path, topdown=True):
-                self.__categorizer(files, current_path)
-        elif self.enter_sub == 'N' or self.enter_sub == '':
-            self.__categorizer(listdir(self.abs_path), None)
-        else:
-            raise SyntaxError('Please enter valid char or nothing!')
+            if not path.exists(dest_path):
+                mkdir(dest_path)
 
-        shutil.rmtree(self.abs_path)
-        print('\nAll files classified')
-        sys.exit()
+            source = path.join(curr_path, file)
+            destination = path.join(dest_path, file)
 
-    def __categorizer(self, data_list, current_path):
-        for data in data_list:
-            _, tail = path.splitext(data)
-            if tail != '':
-                my_path = self.rootdir + tail[1:].upper() + ' Files'
-            else:
-                my_path = self.rootdir + 'Unknown Files'
+            move(source, destination)
 
-            if not path.exists(my_path):
-                mkdir(my_path)
+abs_path = input('Enter the absolute path of the directory to be scanned: ').strip()
+dest_path = input('Enter the destination path to put classified files: ').strip()
+should_traverse = True if input('Do you want to traverse within every subdirectory (Y/N): ').strip().upper() == "Y" else False
 
-            self.__transporter(data, my_path, current_path)
-
-    def __transporter(self, source, destination, current_path):
-        adj_source = path.join(
-            self.abs_path if current_path is None else current_path, source)
-        adj_destination = path.join(destination, source)
-
-        shutil.move(adj_source, adj_destination)
-
-    def __run(self):
-        self.__creator()
-
-path_inp = input('Enter a absolute path of directroy: ').strip(' ')
-dest_path = input('Enter the destination path of new directory: (Default root directory) ').strip(' ')
-walk_inp = input('Enter to every subdirectory: (Y/N) (Default N) ').strip(' ')
-
-Classifier(path_inp, dest_path, walk_inp)
+Classifier(abs_path, dest_path, should_traverse)
